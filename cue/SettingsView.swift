@@ -131,6 +131,7 @@ struct GenreSelectionListView: View {
     let title: String
     @Binding var selection: Set<String>
     @State private var searchText = ""
+    @State private var displayedCount = 100
     
     var body: some View {
         ZStack {
@@ -143,6 +144,9 @@ struct GenreSelectionListView: View {
                     .background(Color.white.opacity(0.1))
                     .cornerRadius(12)
                     .padding()
+                    .onChange(of: searchText) { _ in
+                        displayedCount = 100
+                    }
                 
                 // 2. Multipill Display (if any selection)
                 if !selection.isEmpty {
@@ -185,7 +189,7 @@ struct GenreSelectionListView: View {
                 
                 // 3. Genre List
                 List {
-                    ForEach(filteredGenres, id: \.self) { genre in
+                    ForEach(Array(filteredGenres.enumerated()), id: \.element) { index, genre in
                         Button(action: {
                             if selection.contains(genre) {
                                 selection.remove(genre)
@@ -207,6 +211,11 @@ struct GenreSelectionListView: View {
                             }
                         }
                         .listRowBackground(selection.contains(genre) ? Color.green.opacity(0.1) : Color.white.opacity(0.05))
+                        .onAppear {
+                            if searchText.isEmpty && index == displayedCount - 10 {
+                                loadMoreGenres()
+                            }
+                        }
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -227,9 +236,17 @@ struct GenreSelectionListView: View {
     
     var filteredGenres: [String] {
         if searchText.isEmpty {
-            return Genres.all.prefix(100).map { String($0) } // Initial limit to prevent lag
+            let allGenres = Genres.all
+            return Array(allGenres.prefix(min(displayedCount, allGenres.count)))
         } else {
             return Genres.all.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
+    private func loadMoreGenres() {
+        let totalGenres = Genres.all.count
+        if displayedCount < totalGenres {
+            displayedCount = min(displayedCount + 100, totalGenres)
         }
     }
 }

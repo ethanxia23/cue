@@ -1,6 +1,12 @@
 # Cue
 
+**[Video Demo](https://drive.google.com/file/d/17XO_YXlk3O7S637Dr1lXOM-zoylJqasF/view?usp=sharing)**
+
 Cue is an iOS application that automatically curates music recommendations based on your real-time heart rate during workouts. The app connects to heart rate monitors (Bluetooth LE devices or Apple Watch via HealthKit) and uses your current heart rate zone to intelligently queue songs from Spotify that match your workout intensity.
+
+![App Screenshot 1](IMG_6690.PNG)
+
+![App Screenshot 2](IMG_6691.PNG)
 
 ## Overview
 
