@@ -472,7 +472,7 @@ struct HeartRateSectionView: View {
         let percent = hr / maxHR
         
         switch percent {
-        case ..<0.50: return .gray.opacity(0.5) // Zone 0 - Recovery/Idle
+        case ..<0.50: return .gray.opacity(0.5)  // Zone 0 - Recovery/Idle
         case 0.50..<0.60: return .gray           // Zone 1 - Very Light
         case 0.60..<0.70: return .blue           // Zone 2 - Light
         case 0.70..<0.80: return .green          // Zone 3 - Moderate

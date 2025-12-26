@@ -1196,7 +1196,7 @@ class SpotifyAuthManager: NSObject, ObservableObject, ASWebAuthenticationPresent
             
             // Log raw response for debugging
             if let data = data, let rawResponse = String(data: data, encoding: .utf8) {
-                print("📄 Raw Rec Response [\(statusCode)]: \(rawResponse)")
+                print("Raw Rec Response [\(statusCode)]: \(rawResponse)")
             }
             
             guard let data = data, !data.isEmpty else {
@@ -1359,16 +1359,29 @@ class SpotifyAuthManager: NSObject, ObservableObject, ASWebAuthenticationPresent
             
             print("Heart Rate: \(hr) BPM (Zone \(zone)) -> Music BPM Range: \(bpmRange.start)-\(bpmRange.end)")
 
-            // Cyanite-based implementation
             let trackId = currentTrack.uri.replacingOccurrences(of: "spotify:track:", with: "")
             print("SEED TRACK (recommending from): '\(currentTrack.name)' by \(currentTrack.artistNames)")
             
-            fetchCyaniteRecommendations(
-                spotifyTrackId: trackId,
-                addToQueue: true,
-                bpmRange: bpmRange,
-                targetGenres: targetGenres
-            )
+            print("SPOTIFY CATEGORY FLOW: Starting recommendation process")
+            print("  Zone: \(zone) (\(strategy))")
+            print("  Target genres from user selection: \(targetGenres.joined(separator: ", "))")
+            
+            fetchTracksFromCategory(targetGenres: targetGenres) { [weak self] selectedTrack in
+                guard let self = self else { return }
+                
+                if let track = selectedTrack {
+                    print("SPOTIFY CATEGORY FLOW: Successfully selected track from Spotify: '\(track.name)' by \(track.artistNames)")
+                    self.selectAndQueueTrack(track, seedTrackId: trackId)
+                } else {
+                    print("SPOTIFY CATEGORY FLOW: No valid track found from Spotify after trying all playlists, falling back to Cyanite")
+                    self.fetchCyaniteRecommendations(
+                        spotifyTrackId: trackId,
+                        addToQueue: true,
+                        bpmRange: bpmRange,
+                        targetGenres: targetGenres
+                    )
+                }
+            }
         } else {
             // Log that we skipped because of missing genres for THIS specific strategy
             let event = RecommendationEvent(
@@ -2464,6 +2477,612 @@ class SpotifyAuthManager: NSObject, ObservableObject, ASWebAuthenticationPresent
             .first { $0.isKeyWindow } ?? ASPresentationAnchor()
     }
     
+    // MARK: - Browse Categories API
+    
+    private var cachedCategories: [SpotifyCategory] = []
+    private var categoriesCacheDate: Date?
+    private let categoriesCacheTTL: TimeInterval = 3600 // 1 hour cache
+    
+    // Negative intent filter - banned keywords for playlist names/descriptions
+    private let bannedPlaylistTokens: [String] = [
+        "christmas", "holiday", "xmas", "noel", "santa",
+        "🎄", "🎅", "snow", "winter",
+        "halloween", "easter", "valentine",
+        "love songs", "romance",
+        "sleep", "chill", "ambient", "relax", "meditation", "study",
+        "soundtrack", "ost",
+        "kids", "family"
+    ]
+    
+    private func isBannedPlaylist(_ playlist: SpotifySearchPlaylistItem) -> Bool {
+        let name = playlist.name.lowercased()
+        let description = (playlist.description ?? "").lowercased()
+        let combinedText = "\(name) \(description)"
+        
+        return bannedPlaylistTokens.contains { token in
+            combinedText.contains(token.lowercased())
+        }
+    }
+    
+    private func mapGenresToCategoryIds(_ genres: [String], availableCategories: [SpotifyCategory]) -> [String] {
+        print("SPOTIFY CATEGORY FLOW: Mapping genres to category IDs using fuzzy matching")
+        print("  Input genres: \(genres.joined(separator: ", "))")
+        print("  Available categories: \(availableCategories.count) total")
+        
+        var categoryScores: [(id: String, name: String, score: Int)] = []
+        
+        // Known valid browse category IDs (these are the actual category identifiers Spotify uses)
+        let validCategoryIds: Set<String> = [
+            "dance_electronic", "edm_dance", "electronic", "house", "techno", "trance",
+            "rock", "metal", "pop", "hiphop", "hip_hop", "r_n_b", "rnb",
+            "jazz", "blues", "classical", "reggae", "folk", "country",
+            "funk", "disco", "latin", "reggaeton", "party", "work-out", "work_out", "study"
+        ]
+        
+        // Genre to category name/ID mapping
+        let genreToCategoryMap: [String: [String]] = [
+            "electronic": ["dance_electronic", "edm_dance", "electronic"],
+            "edm": ["edm_dance", "dance_electronic"],
+            "house": ["house"],
+            "drum and bass": ["edm_dance", "dance_electronic"],
+            "drum-and-bass": ["edm_dance", "dance_electronic"],
+            "techno": ["edm_dance", "dance_electronic"],
+            "trance": ["edm_dance", "dance_electronic"],
+            "rock": ["rock"],
+            "metal": ["metal"],
+            "pop": ["pop"],
+            "hip-hop": ["hiphop", "hip_hop"],
+            "hiphop": ["hiphop", "hip_hop"],
+            "r&b": ["r_n_b", "rnb"],
+            "rnb": ["r_n_b", "rnb"],
+            "jazz": ["jazz"],
+            "blues": ["blues"],
+            "classical": ["classical"],
+            "reggae": ["reggae"],
+            "folk": ["folk"],
+            "country": ["country"],
+            "funk": ["funk"],
+            "disco": ["disco"],
+            "latin": ["latin"],
+            "reggaeton": ["reggaeton"],
+            "party": ["party"],
+            "workout": ["work-out", "work_out"],
+            "work-out": ["work-out", "work_out"],
+            "focus": ["study"],
+            "study": ["study"]
+        ]
+        
+        // First, try direct mapping from genre to known category IDs
+        var directMatches: [String] = []
+        for genre in genres {
+            let normalized = genre.lowercased().trimmingCharacters(in: .whitespaces)
+            if let categoryIds = genreToCategoryMap[normalized] {
+                directMatches.append(contentsOf: categoryIds)
+            }
+        }
+        
+        // Also try matching category names and constructing IDs from them
+        for genre in genres {
+            let normalized = genre.lowercased().trimmingCharacters(in: .whitespaces)
+            let genreWords = normalized.components(separatedBy: CharacterSet(charactersIn: " -_")).filter { !$0.isEmpty }
+            
+            for category in availableCategories {
+                let categoryNameLower = category.name.lowercased()
+                var score = 0
+                
+                // Exact match in category name
+                if categoryNameLower == normalized {
+                    score += 200
+                } else if categoryNameLower.contains(normalized) || normalized.contains(categoryNameLower) {
+                    score += 100
+                }
+                
+                // Word-by-word matching
+                for word in genreWords {
+                    if categoryNameLower.contains(word) {
+                        score += 50
+                    }
+                }
+                
+                if score > 0 {
+                    // Construct category ID from name based on Spotify's actual category ID format
+                    var constructedId: String
+                    
+                    // Map common category names to their actual Spotify browse category IDs
+                    let nameToIdMap: [String: String] = [
+                        "hip-hop": "hiphop",
+                        "hip hop": "hiphop",
+                        "r&b": "r_n_b",
+                        "rnb": "r_n_b",
+                        "r and b": "r_n_b",
+                        "dance / electronic": "dance_electronic",
+                        "dance/electronic": "dance_electronic",
+                        "dance electronic": "dance_electronic",
+                        "edm / dance": "edm_dance",
+                        "edm/dance": "edm_dance",
+                        "edm dance": "edm_dance",
+                        "work-out": "work-out",
+                        "work out": "work-out",
+                        "workout": "work-out"
+                    ]
+                    
+                    // Check direct name mapping first
+                    if let mappedId = nameToIdMap[categoryNameLower] {
+                        constructedId = mappedId
+                    } else {
+                        // Construct from name: lowercase, replace spaces/slashes with underscores or hyphens
+                        constructedId = categoryNameLower
+                            .replacingOccurrences(of: " / ", with: "_")
+                            .replacingOccurrences(of: "/", with: "_")
+                            .replacingOccurrences(of: " ", with: "_")
+                            .replacingOccurrences(of: "-", with: "_")
+                            .replacingOccurrences(of: "&", with: "_")
+                            .replacingOccurrences(of: "__", with: "_")
+                            .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+                    }
+                    
+                    // Only use if it matches a known valid category ID or looks like a valid format
+                    if validCategoryIds.contains(constructedId) {
+                        categoryScores.append((id: constructedId, name: category.name, score: score))
+                    } else if constructedId.count < 30 && constructedId.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) {
+                        // Looks like a valid category ID format, try it
+                        categoryScores.append((id: constructedId, name: category.name, score: score))
+                    }
+                }
+            }
+        }
+        
+        // Combine direct matches with fuzzy matches, prioritizing direct matches
+        var finalMatches: [String] = []
+        
+        // Add direct matches first (highest priority)
+        finalMatches.append(contentsOf: directMatches)
+        
+        // Add fuzzy matches sorted by score
+        categoryScores.sort { $0.score > $1.score }
+        for match in categoryScores {
+            if !finalMatches.contains(match.id) {
+                finalMatches.append(match.id)
+            }
+        }
+        
+        if !finalMatches.isEmpty {
+            print("  Matched category IDs (in priority order):")
+            for (index, categoryId) in finalMatches.prefix(5).enumerated() {
+                if index < directMatches.count {
+                    print("    \(index + 1). '\(categoryId)' (direct match)")
+                } else if let match = categoryScores.first(where: { $0.id == categoryId }) {
+                    print("    \(index + 1). '\(categoryId)' (from '\(match.name)', score: \(match.score))")
+                }
+            }
+            return finalMatches
+        }
+        
+        print("  No category matches found, using fallback")
+        return ["work-out"]
+    }
+    
+    private func fetchSpotifyCategories(forceRefresh: Bool = false, completion: @escaping ([SpotifyCategory]) -> Void) {
+        // Check cache first
+        if !forceRefresh,
+           let cacheDate = categoriesCacheDate,
+           Date().timeIntervalSince(cacheDate) < categoriesCacheTTL,
+           !cachedCategories.isEmpty {
+            print("SPOTIFY CATEGORY FLOW: Using cached categories (\(cachedCategories.count) categories)")
+            completion(cachedCategories)
+            return
+        }
+        
+        guard let token = accessToken else {
+            print("SPOTIFY CATEGORY FLOW: No access token available for fetching categories")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Fetching live categories from Spotify API")
+        
+        var components = URLComponents(string: "https://api.spotify.com/v1/browse/categories")!
+        components.queryItems = [
+            URLQueryItem(name: "country", value: userMarket),
+            URLQueryItem(name: "limit", value: "50")
+        ]
+        
+        guard let url = components.url else {
+            print("SPOTIFY CATEGORY FLOW: Failed to construct URL for categories")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Request URL: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else {
+                completion([])
+                return
+            }
+            
+            if let error = error {
+                print("SPOTIFY CATEGORY FLOW: Error fetching categories: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = data,
+                  let httpResponse = response as? HTTPURLResponse else {
+                print("SPOTIFY CATEGORY FLOW: No data or invalid response for categories")
+                completion([])
+                return
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                print("SPOTIFY CATEGORY FLOW: HTTP error status \(httpResponse.statusCode) for categories")
+                if let responseBody = String(data: data, encoding: .utf8) {
+                    print("SPOTIFY CATEGORY FLOW: Response body: \(responseBody)")
+                }
+                completion([])
+                return
+            }
+            
+            do {
+                let response = try JSONDecoder().decode(SpotifyCategoriesResponse.self, from: data)
+                let categories = response.categories.items
+                
+                print("SPOTIFY CATEGORY FLOW: Received \(categories.count) categories from Spotify")
+                print("  Sample categories:")
+                for (index, category) in categories.prefix(10).enumerated() {
+                    print("    \(index + 1). '\(category.name)' (ID: \(category.id))")
+                }
+                if categories.count > 10 {
+                    print("    ... and \(categories.count - 10) more categories")
+                }
+                
+                // Update cache
+                self.cachedCategories = categories
+                self.categoriesCacheDate = Date()
+                
+                DispatchQueue.main.async {
+                    completion(categories)
+                }
+            } catch {
+                print("SPOTIFY CATEGORY FLOW: Error parsing categories: \(error)")
+                completion([])
+            }
+        }.resume()
+    }
+    
+    private func fetchCategoryPlaylists(categoryId: String, completion: @escaping ([SpotifyPlaylistItem]) -> Void) {
+        guard let token = accessToken else {
+            print("SPOTIFY CATEGORY FLOW: No access token available")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Fetching playlists for category '\(categoryId)'")
+        
+        var components = URLComponents(string: "https://api.spotify.com/v1/browse/categories/\(categoryId)/playlists")!
+        components.queryItems = [
+            URLQueryItem(name: "limit", value: "20"),
+            URLQueryItem(name: "country", value: userMarket)
+        ]
+        
+        guard let url = components.url else {
+            print("SPOTIFY CATEGORY FLOW: Failed to construct URL for category playlists")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Request URL: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("SPOTIFY CATEGORY FLOW: Error fetching playlists: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = data,
+                  let httpResponse = response as? HTTPURLResponse else {
+                print("SPOTIFY CATEGORY FLOW: No data or invalid response")
+                completion([])
+                return
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                print("SPOTIFY CATEGORY FLOW: HTTP error status \(httpResponse.statusCode) for category '\(categoryId)'")
+                if let responseBody = String(data: data, encoding: .utf8) {
+                    print("SPOTIFY CATEGORY FLOW: Response body: \(responseBody)")
+                }
+                completion([])
+                return
+            }
+            
+            do {
+                let response = try JSONDecoder().decode(SpotifyCategoryPlaylistsResponse.self, from: data)
+                let playlists = response.playlists.items
+                print("SPOTIFY CATEGORY FLOW: Received \(playlists.count) playlists from category '\(categoryId)'")
+                print("  Playlists returned:")
+                for (index, playlist) in playlists.prefix(5).enumerated() {
+                    print("    \(index + 1). '\(playlist.name)' (ID: \(playlist.id))")
+                }
+                if playlists.count > 5 {
+                    print("    ... and \(playlists.count - 5) more playlists")
+                }
+                DispatchQueue.main.async {
+                    completion(playlists)
+                }
+            } catch {
+                print("SPOTIFY CATEGORY FLOW: Error parsing category playlists: \(error)")
+                completion([])
+            }
+        }.resume()
+    }
+    
+    private func fetchPlaylistTracks(playlistId: String, completion: @escaping ([SpotifyTrack]) -> Void) {
+        guard let token = accessToken else {
+            print("SPOTIFY CATEGORY FLOW: No access token available for playlist tracks")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Fetching tracks from playlist ID '\(playlistId)'")
+        
+        var components = URLComponents(string: "https://api.spotify.com/v1/playlists/\(playlistId)/tracks")!
+        components.queryItems = [
+            URLQueryItem(name: "limit", value: "100"),
+            URLQueryItem(name: "market", value: userMarket)
+        ]
+        
+        guard let url = components.url else {
+            print("SPOTIFY CATEGORY FLOW: Failed to construct URL for playlist tracks")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Request URL: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("SPOTIFY CATEGORY FLOW: Error fetching playlist tracks: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = data,
+                  let httpResponse = response as? HTTPURLResponse else {
+                print("SPOTIFY CATEGORY FLOW: No data or invalid response for playlist tracks")
+                completion([])
+                return
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                print("SPOTIFY CATEGORY FLOW: HTTP error status \(httpResponse.statusCode) for playlist tracks")
+                if let responseBody = String(data: data, encoding: .utf8) {
+                    print("SPOTIFY CATEGORY FLOW: Response body: \(responseBody)")
+                }
+                completion([])
+                return
+            }
+            
+            do {
+                let response = try JSONDecoder().decode(SpotifyPlaylistTracksResponse.self, from: data)
+                let tracks = response.items.compactMap { $0.track }
+                print("SPOTIFY CATEGORY FLOW: Received \(tracks.count) tracks from playlist '\(playlistId)'")
+                DispatchQueue.main.async {
+                    completion(tracks)
+                }
+            } catch {
+                print("SPOTIFY CATEGORY FLOW: Error parsing playlist tracks: \(error)")
+                completion([])
+            }
+        }.resume()
+    }
+    
+    private func fetchTracksFromCategory(targetGenres: [String], completion: @escaping (SpotifyTrack?) -> Void) {
+        print("SPOTIFY CATEGORY FLOW: Starting search-based track discovery")
+        print("  Target genres: \(targetGenres.joined(separator: ", "))")
+        
+        // Use Search API to find playlists by genre
+        searchPlaylistsByGenre(genres: targetGenres) { [weak self] playlists in
+            guard let self = self, !playlists.isEmpty else {
+                print("SPOTIFY CATEGORY FLOW: No playlists found via search")
+                completion(nil)
+                return
+            }
+            
+            print("SPOTIFY CATEGORY FLOW: Found \(playlists.count) playlists, trying to find valid track")
+            
+            // Try playlists in random order until we find a valid track
+            var shuffledPlaylists = playlists.shuffled()
+            self.tryPlaylistsForValidTrack(playlists: shuffledPlaylists, attemptIndex: 0, completion: completion)
+        }
+    }
+    
+    private func tryPlaylistsForValidTrack(playlists: [SpotifySearchPlaylistItem], attemptIndex: Int, completion: @escaping (SpotifyTrack?) -> Void) {
+        guard attemptIndex < playlists.count else {
+            print("SPOTIFY CATEGORY FLOW: Exhausted all \(playlists.count) playlists, no valid track found")
+            completion(nil)
+            return
+        }
+        
+        let playlist = playlists[attemptIndex]
+        print("SPOTIFY CATEGORY FLOW: Attempt \(attemptIndex + 1)/\(playlists.count): Trying playlist '\(playlist.name)' (ID: \(playlist.id))")
+        
+        fetchPlaylistTracks(playlistId: playlist.id) { [weak self] tracks in
+            guard let self = self else {
+                completion(nil)
+                return
+            }
+            
+            guard !tracks.isEmpty else {
+                print("SPOTIFY CATEGORY FLOW: Playlist '\(playlist.name)' returned no tracks, trying next playlist")
+                self.tryPlaylistsForValidTrack(playlists: playlists, attemptIndex: attemptIndex + 1, completion: completion)
+                return
+            }
+            
+            print("SPOTIFY CATEGORY FLOW: Received \(tracks.count) tracks from playlist '\(playlist.name)'")
+            print("  Sample tracks:")
+            for (index, track) in tracks.prefix(3).enumerated() {
+                print("    \(index + 1). '\(track.name)' by \(track.artistNames)")
+            }
+            
+            // Filter out duplicates
+            let filtered = tracks.filter { track in
+                !self.isTrackDuplicate(trackName: track.name, artistNames: track.artistNames)
+            }
+            
+            print("SPOTIFY CATEGORY FLOW: After duplicate filtering: \(filtered.count) tracks remaining")
+            
+            if let selected = filtered.randomElement() {
+                print("SPOTIFY CATEGORY FLOW: Successfully found valid track: '\(selected.name)' by \(selected.artistNames)")
+                completion(selected)
+            } else {
+                print("SPOTIFY CATEGORY FLOW: All tracks from playlist '\(playlist.name)' were duplicates, trying next playlist")
+                self.tryPlaylistsForValidTrack(playlists: playlists, attemptIndex: attemptIndex + 1, completion: completion)
+            }
+        }
+    }
+    
+    private func searchPlaylistsByGenre(genres: [String], completion: @escaping ([SpotifySearchPlaylistItem]) -> Void) {
+        guard let token = accessToken else {
+            print("SPOTIFY CATEGORY FLOW: No access token available for search")
+            completion([])
+            return
+        }
+        
+        // Build combined keyword search query from all genres
+        // Normalize genres and combine into a single search string
+        let normalizedGenres = genres.map { genre in
+            genre.lowercased().trimmingCharacters(in: .whitespaces)
+        }
+        
+        // Combine all genres into a single search query
+        let searchQuery = normalizedGenres.joined(separator: " ")
+        
+        print("SPOTIFY CATEGORY FLOW: Searching for playlists with combined genre query: '\(searchQuery)'")
+        print("  Combined from genres: \(genres.joined(separator: ", "))")
+        
+        var components = URLComponents(string: "https://api.spotify.com/v1/search")!
+        components.queryItems = [
+            URLQueryItem(name: "q", value: searchQuery),
+            URLQueryItem(name: "type", value: "playlist"),
+            URLQueryItem(name: "limit", value: "50"),
+            URLQueryItem(name: "market", value: userMarket)
+        ]
+        
+        guard let url = components.url else {
+            print("SPOTIFY CATEGORY FLOW: Failed to construct search URL")
+            completion([])
+            return
+        }
+        
+        print("SPOTIFY CATEGORY FLOW: Search URL: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("SPOTIFY CATEGORY FLOW: Error searching playlists: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = data,
+                  let httpResponse = response as? HTTPURLResponse else {
+                print("SPOTIFY CATEGORY FLOW: No data or invalid response from search")
+                completion([])
+                return
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                print("SPOTIFY CATEGORY FLOW: HTTP error status \(httpResponse.statusCode) for search")
+                if let responseBody = String(data: data, encoding: .utf8) {
+                    print("SPOTIFY CATEGORY FLOW: Response body: \(responseBody)")
+                }
+                completion([])
+                return
+            }
+            
+            do {
+                let response = try JSONDecoder().decode(SpotifySearchResponse.self, from: data)
+                
+                // Filter out null items (Spotify returns null for deleted/restricted playlists)
+                let allItems = response.playlists?.items ?? []
+                let validPlaylists = allItems.compactMap { $0 }
+                
+                print("SPOTIFY CATEGORY FLOW: Received \(allItems.count) items from search (total: \(response.playlists?.total ?? 0))")
+                print("  Valid playlists after filtering nulls: \(validPlaylists.count)")
+                
+                // Filter for quality: minimum 20 tracks, exclude podcasts, exclude banned content
+                let qualityPlaylists = validPlaylists.filter { playlist in
+                    let trackCount = playlist.tracks?.total ?? 0
+                    let nameLower = playlist.name.lowercased()
+                    let isPodcast = nameLower.contains("podcast") || nameLower.contains("episode")
+                    let hasEnoughTracks = trackCount >= 20
+                    let isBanned = self.isBannedPlaylist(playlist)
+                    
+                    if isBanned {
+                        print("SPOTIFY CATEGORY FLOW: Filtered out banned playlist: '\(playlist.name)'")
+                    }
+                    
+                    return hasEnoughTracks && !isPodcast && !isBanned
+                }
+                
+                print("  Quality playlists (>=20 tracks, no podcasts, no banned content): \(qualityPlaylists.count)")
+                
+                if qualityPlaylists.isEmpty {
+                    print("SPOTIFY CATEGORY FLOW: No quality playlists found after filtering")
+                    // Fallback: try without track count requirement, but still filter banned content
+                    let fallbackPlaylists = validPlaylists.filter { playlist in
+                        let nameLower = playlist.name.lowercased()
+                        let isPodcast = nameLower.contains("podcast") || nameLower.contains("episode")
+                        let isBanned = self.isBannedPlaylist(playlist)
+                        return !isPodcast && !isBanned
+                    }
+                    
+                    if !fallbackPlaylists.isEmpty {
+                        print("SPOTIFY CATEGORY FLOW: Using fallback playlists (no track count requirement, but filtered banned content): \(fallbackPlaylists.count)")
+                        DispatchQueue.main.async {
+                            completion(fallbackPlaylists)
+                        }
+                        return
+                    }
+                    completion([])
+                    return
+                }
+                
+                print("  Sample quality playlists:")
+                for (index, playlist) in qualityPlaylists.prefix(5).enumerated() {
+                    let trackCount = playlist.tracks?.total ?? 0
+                    print("    \(index + 1). '\(playlist.name)' (ID: \(playlist.id), tracks: \(trackCount))")
+                }
+                if qualityPlaylists.count > 5 {
+                    print("    ... and \(qualityPlaylists.count - 5) more playlists")
+                }
+                
+                DispatchQueue.main.async {
+                    completion(qualityPlaylists)
+                }
+            } catch {
+                print("SPOTIFY CATEGORY FLOW: Error parsing search response: \(error)")
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let preview = jsonString.count > 500 ? String(jsonString.prefix(500)) + "..." : jsonString
+                    print("SPOTIFY CATEGORY FLOW: Raw response preview: \(preview)")
+                }
+                completion([])
+            }
+        }.resume()
+    }
+    
     // MARK: - PKCE Helper Functions
     
     private func generateCodeVerifier() -> String {
@@ -2529,6 +3148,60 @@ struct SpotifyImage: Codable {
 
 struct SpotifyRecommendationResponse: Codable {
     let tracks: [SpotifyTrack]
+}
+
+struct SpotifyCategoriesResponse: Codable {
+    let categories: SpotifyCategoriesList
+}
+
+struct SpotifyCategoriesList: Codable {
+    let items: [SpotifyCategory]
+}
+
+struct SpotifyCategory: Codable {
+    let id: String
+    let name: String
+}
+
+struct SpotifyCategoryPlaylistsResponse: Codable {
+    let playlists: SpotifyPlaylistsList
+}
+
+struct SpotifyPlaylistsList: Codable {
+    let items: [SpotifyPlaylistItem]
+}
+
+struct SpotifyPlaylistItem: Codable {
+    let id: String
+    let name: String
+}
+
+struct SpotifyPlaylistTracksResponse: Codable {
+    let items: [SpotifyPlaylistTrackItem]
+}
+
+struct SpotifyPlaylistTrackItem: Codable {
+    let track: SpotifyTrack?
+}
+
+struct SpotifySearchResponse: Codable {
+    let playlists: SpotifySearchPlaylists?
+}
+
+struct SpotifySearchPlaylists: Codable {
+    let items: [SpotifySearchPlaylistItem?]
+    let total: Int?
+}
+
+struct SpotifySearchPlaylistItem: Codable {
+    let id: String
+    let name: String
+    let tracks: SpotifyPlaylistTracksInfo?
+    let description: String?
+}
+
+struct SpotifyPlaylistTracksInfo: Codable {
+    let total: Int?
 }
 
 // Enriched track with popularity and artist IDs for ranking
