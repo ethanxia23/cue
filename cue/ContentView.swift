@@ -436,12 +436,14 @@ struct HeartRateSectionView: View {
                         .font(.system(size: 40, weight: .bold, design: .rounded))
                         .foregroundColor(heartRateColor)
                         .scaleEffect(heartRateManager.currentHeartRate > 0 ? 1.05 : 1.0)
+                        .fixedSize(horizontal: true, vertical: false)
                     
                     Text("BPM")
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundColor(.gray)
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 
                 let zone = userPreferences.zoneFor(bpm: heartRateManager.currentHeartRate)
                 Text("ZONE \(zone)")
@@ -454,7 +456,7 @@ struct HeartRateSectionView: View {
                     .cornerRadius(4)
             }
             .padding(12)
-            .frame(width: 120) // Give it a fixed width so centering is obvious
+            .frame(width: 130) // Width of the overlay
             .background(Color.black.opacity(0.8))
             .cornerRadius(12)
             .padding(.top, 20)
@@ -485,6 +487,7 @@ struct HeartRateSectionView: View {
 
 struct HeartRateGraphView: View {
     @EnvironmentObject var heartRateManager: HeartRateManager
+    @EnvironmentObject var userPreferences: UserPreferences
     var lineColor: Color = .green
     
     var body: some View {
@@ -526,7 +529,37 @@ struct HeartRateGraphView: View {
             }
         }
         .chartXAxis(.hidden)
-        .chartYScale(domain: 0...max(100, heartRateManager.sessionMaxHeartRate + 10))
+        .chartYScale(domain: 0...calculatedYAxisMax)
         .animation(.default, value: heartRateManager.heartRateHistory)
+    }
+    
+    private var calculatedYAxisMax: Int {
+        let currentHR = heartRateManager.currentHeartRate
+        let sessionMax = heartRateManager.sessionMaxHeartRate
+        let userMaxHR = userPreferences.maxHeartRate
+        let absoluteMax = userMaxHR + 20
+        
+        // If no heart rate data, use a default minimum
+        guard currentHR > 0 || sessionMax > 0 else {
+            return 100
+        }
+        
+        // Calculate desired max to keep current HR at ~60% of graph
+        // If current HR is at 60%, then max = current HR / 0.6
+        let desiredMax: Int
+        if currentHR > 0 {
+            desiredMax = Int(Double(currentHR) / 0.6)
+        } else {
+            // Use session max if no current reading
+            desiredMax = Int(Double(sessionMax) / 0.6)
+        }
+        
+        // Ensure minimum of 100 or session max + 10
+        let minMax = max(100, sessionMax + 10)
+        
+        // Use the larger of desired max or min max, but cap at absolute max
+        let finalMax = min(max(desiredMax, minMax), absoluteMax)
+        
+        return finalMax
     }
 }
