@@ -1,0 +1,409 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		866FCE2C2EFA4F0700DA396A /* cueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE2B2EFA4F0700DA396A /* cueApp.swift */; };
+		866FCE2E2EFA4F0700DA396A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE2D2EFA4F0700DA396A /* ContentView.swift */; };
+		866FCE302EFA4F0800DA396A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 866FCE2F2EFA4F0800DA396A /* Assets.xcassets */; };
+		866FCE332EFA4F0800DA396A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 866FCE322EFA4F0800DA396A /* Preview Assets.xcassets */; };
+		866FCE3A2EFA50CA00DA396A /* HeartRateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE392EFA50CA00DA396A /* HeartRateManager.swift */; };
+		866FCE3C2EFA50E300DA396A /* SpotifyAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE3B2EFA50E300DA396A /* SpotifyAuthManager.swift */; };
+		866FCE3E2EFA52C600DA396A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE3D2EFA52C500DA396A /* AuthView.swift */; };
+		866FCE432EFB15F900DA396A /* DeviceSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE422EFB15F900DA396A /* DeviceSelectionView.swift */; };
+		866FCE452EFB16C300DA396A /* ConnectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE442EFB16C300DA396A /* ConnectionCard.swift */; };
+		866FCE472EFB16C400DA396A /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE462EFB16C400DA396A /* KeychainManager.swift */; };
+		866FCE492EFB16C400DA396A /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE482EFB16C400DA396A /* UserPreferences.swift */; };
+		866FCE4B2EFB16C400DA396A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE4A2EFB16C400DA396A /* OnboardingView.swift */; };
+		866FCE4D2EFB16C400DA396A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE4C2EFB16C400DA396A /* SettingsView.swift */; };
+		866FCE4F2EFB16C400DA396A /* SimulatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866FCE4E2EFB16C400DA396A /* SimulatorView.swift */; };
+		86D1F7362EFDE395009A7EB0 /* Genres.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86D1F7352EFDE395009A7EB0 /* Genres.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		866FCE282EFA4F0700DA396A /* cue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cue.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		866FCE2B2EFA4F0700DA396A /* cueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cueApp.swift; sourceTree = "<group>"; };
+		866FCE2D2EFA4F0700DA396A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		866FCE2F2EFA4F0800DA396A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		866FCE322EFA4F0800DA396A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		866FCE392EFA50CA00DA396A /* HeartRateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateManager.swift; sourceTree = "<group>"; };
+		866FCE3B2EFA50E300DA396A /* SpotifyAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAuthManager.swift; sourceTree = "<group>"; };
+		866FCE3D2EFA52C500DA396A /* AuthView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		866FCE3F2EFA53EA00DA396A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		866FCE412EFA588400DA396A /* cue.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = cue.entitlements; sourceTree = "<group>"; };
+		866FCE422EFB15F900DA396A /* DeviceSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSelectionView.swift; sourceTree = "<group>"; };
+		866FCE442EFB16C300DA396A /* ConnectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCard.swift; sourceTree = "<group>"; };
+		866FCE462EFB16C400DA396A /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		866FCE482EFB16C400DA396A /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
+		866FCE4A2EFB16C400DA396A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		866FCE4C2EFB16C400DA396A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		866FCE4E2EFB16C400DA396A /* SimulatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorView.swift; sourceTree = "<group>"; };
+		86D1F7352EFDE395009A7EB0 /* Genres.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Genres.swift; path = cue/Genres.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		866FCE252EFA4F0700DA396A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		866FCE1F2EFA4F0700DA396A = {
+			isa = PBXGroup;
+			children = (
+				86D1F7352EFDE395009A7EB0 /* Genres.swift */,
+				866FCE2A2EFA4F0700DA396A /* cue */,
+				866FCE292EFA4F0700DA396A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		866FCE292EFA4F0700DA396A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				866FCE282EFA4F0700DA396A /* cue.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		866FCE2A2EFA4F0700DA396A /* cue */ = {
+			isa = PBXGroup;
+			children = (
+				866FCE412EFA588400DA396A /* cue.entitlements */,
+				866FCE2B2EFA4F0700DA396A /* cueApp.swift */,
+				866FCE3F2EFA53EA00DA396A /* Info.plist */,
+				866FCE3D2EFA52C500DA396A /* AuthView.swift */,
+				866FCE442EFB16C300DA396A /* ConnectionCard.swift */,
+				866FCE422EFB15F900DA396A /* DeviceSelectionView.swift */,
+				866FCE2D2EFA4F0700DA396A /* ContentView.swift */,
+				866FCE392EFA50CA00DA396A /* HeartRateManager.swift */,
+				866FCE3B2EFA50E300DA396A /* SpotifyAuthManager.swift */,
+				866FCE462EFB16C400DA396A /* KeychainManager.swift */,
+				866FCE482EFB16C400DA396A /* UserPreferences.swift */,
+				866FCE4A2EFB16C400DA396A /* OnboardingView.swift */,
+				866FCE4C2EFB16C400DA396A /* SettingsView.swift */,
+				866FCE4E2EFB16C400DA396A /* SimulatorView.swift */,
+				866FCE2F2EFA4F0800DA396A /* Assets.xcassets */,
+				866FCE312EFA4F0800DA396A /* Preview Content */,
+			);
+			path = cue;
+			sourceTree = "<group>";
+		};
+		866FCE312EFA4F0800DA396A /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				866FCE322EFA4F0800DA396A /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		866FCE272EFA4F0700DA396A /* cue */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 866FCE362EFA4F0800DA396A /* Build configuration list for PBXNativeTarget "cue" */;
+			buildPhases = (
+				866FCE242EFA4F0700DA396A /* Sources */,
+				866FCE252EFA4F0700DA396A /* Frameworks */,
+				866FCE262EFA4F0700DA396A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = cue;
+			productName = cue;
+			productReference = 866FCE282EFA4F0700DA396A /* cue.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		866FCE202EFA4F0700DA396A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					866FCE272EFA4F0700DA396A = {
+						CreatedOnToolsVersion = 15.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 866FCE232EFA4F0700DA396A /* Build configuration list for PBXProject "cue" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 866FCE1F2EFA4F0700DA396A;
+			productRefGroup = 866FCE292EFA4F0700DA396A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				866FCE272EFA4F0700DA396A /* cue */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		866FCE262EFA4F0700DA396A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				866FCE332EFA4F0800DA396A /* Preview Assets.xcassets in Resources */,
+				866FCE302EFA4F0800DA396A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		866FCE242EFA4F0700DA396A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				866FCE2E2EFA4F0700DA396A /* ContentView.swift in Sources */,
+				866FCE3E2EFA52C600DA396A /* AuthView.swift in Sources */,
+				866FCE3A2EFA50CA00DA396A /* HeartRateManager.swift in Sources */,
+				86D1F7362EFDE395009A7EB0 /* Genres.swift in Sources */,
+				866FCE452EFB16C300DA396A /* ConnectionCard.swift in Sources */,
+				866FCE432EFB15F900DA396A /* DeviceSelectionView.swift in Sources */,
+				866FCE3C2EFA50E300DA396A /* SpotifyAuthManager.swift in Sources */,
+				866FCE472EFB16C400DA396A /* KeychainManager.swift in Sources */,
+				866FCE492EFB16C400DA396A /* UserPreferences.swift in Sources */,
+				866FCE4B2EFB16C400DA396A /* OnboardingView.swift in Sources */,
+				866FCE4D2EFB16C400DA396A /* SettingsView.swift in Sources */,
+				866FCE4F2EFB16C400DA396A /* SimulatorView.swift in Sources */,
+				866FCE2C2EFA4F0700DA396A /* cueApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		866FCE342EFA4F0800DA396A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		866FCE352EFA4F0800DA396A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		866FCE372EFA4F0800DA396A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = cue/cue.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"cue/Preview Content\"";
+				DEVELOPMENT_TEAM = 3GV545265B;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = cue/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "CUE needs Bluetooth to connect to your Heart Rate Monitor to sync your music to your beat.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "CUE needs Bluetooth to connect to your Heart Rate Monitor.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "CUE needs access to your Heart Rate data to sync music to your workout intensity.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CUE may update your workout data.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ethanxia.cue;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		866FCE382EFA4F0800DA396A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = cue/cue.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"cue/Preview Content\"";
+				DEVELOPMENT_TEAM = 3GV545265B;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = cue/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "CUE needs Bluetooth to connect to your Heart Rate Monitor to sync your music to your beat.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "CUE needs Bluetooth to connect to your Heart Rate Monitor.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "CUE needs access to your Heart Rate data to sync music to your workout intensity.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CUE may update your workout data.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ethanxia.cue;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		866FCE232EFA4F0700DA396A /* Build configuration list for PBXProject "cue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				866FCE342EFA4F0800DA396A /* Debug */,
+				866FCE352EFA4F0800DA396A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		866FCE362EFA4F0800DA396A /* Build configuration list for PBXNativeTarget "cue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				866FCE372EFA4F0800DA396A /* Debug */,
+				866FCE382EFA4F0800DA396A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 866FCE202EFA4F0700DA396A /* Project object */;
+}

@@ -1,0 +1,9 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/api/cyanite-webhook",
+            "destination": "/api/cyanite-webhook.js"
+        }
+    ]
+}
