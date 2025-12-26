@@ -69,6 +69,7 @@ final class HeartRateManager: NSObject, ObservableObject {
     private var wantsScan = false
     private var isScanning = false
     private var scanHeartbeat: AnyCancellable?
+    private var connectionTimeoutWorkItem: DispatchWorkItem?
 
     // MARK: - Init
 
@@ -201,17 +202,23 @@ final class HeartRateManager: NSObject, ObservableObject {
             peripheral.delegate = self
             centralManager.connect(peripheral)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+            connectionTimeoutWorkItem?.cancel()
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
                 guard let self = self else { return }
                 if case .connecting = self.status {
                     self.centralManager.cancelPeripheralConnection(peripheral)
                     self.status = .error("Connection timed out")
                 }
             }
+            connectionTimeoutWorkItem = timeoutWorkItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: timeoutWorkItem)
         }
     }
 
     func disconnect() {
+        connectionTimeoutWorkItem?.cancel()
+        connectionTimeoutWorkItem = nil
+        
         if let peripheral = connectedPeripheral {
             centralManager.cancelPeripheralConnection(peripheral)
         }
@@ -224,6 +231,18 @@ final class HeartRateManager: NSObject, ObservableObject {
         connectedPeripheral = nil
         currentHeartRate = 0
         status = .disconnected
+    }
+    
+    func cancelConnection() {
+        connectionTimeoutWorkItem?.cancel()
+        connectionTimeoutWorkItem = nil
+        
+        if case .connecting = status {
+            if let peripheral = connectedPeripheral {
+                centralManager.cancelPeripheralConnection(peripheral)
+            }
+            status = .disconnected
+        }
     }
 
     // MARK: - HealthKit (Apple Watch)

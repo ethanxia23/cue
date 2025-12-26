@@ -89,7 +89,7 @@ struct SimulatorView: View {
                                 ForEach(spotifyAuthManager.recommendationLogs.reversed()) { event in
                                     LogEntryView(event: event)
                                         .listRowBackground(Color.clear)
-                                        .listRowSeparator(.v isible, edges: .bottom)
+                                        .listRowSeparator(.visible, edges: .bottom)
                                 }
                             }
                             .listStyle(.plain)

@@ -84,6 +84,10 @@ struct DeviceSelectionView: View {
             .onAppear {
                 heartRateManager.startScanning()
             }
+            .onDisappear {
+                heartRateManager.stopScanning()
+                heartRateManager.cancelConnection()
+            }
         }
         .preferredColorScheme(.dark)
     }

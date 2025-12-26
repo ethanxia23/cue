@@ -17,6 +17,13 @@ struct SettingsView: View {
     @State private var showFullOnboarding = false
     @State private var showSimulator = false
     
+    var isHeartRateConnected: Bool {
+        if case .connected(_) = heartRateManager.status {
+            return true
+        }
+        return false
+    }
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -84,6 +91,20 @@ struct SettingsView: View {
                     // .listRowBackground(Color.white.opacity(0.05))
                     
                     Section {
+                        if isHeartRateConnected {
+                            Button(role: .destructive, action: {
+                                heartRateManager.disconnect()
+                                dismiss()
+                            }) {
+                                HStack {
+                                    Spacer()
+                                    Text("Disconnect Heart Rate Monitor")
+                                        .foregroundColor(.red)
+                                    Spacer()
+                                }
+                            }
+                        }
+                        
                         Button(role: .destructive, action: {
                             spotifyAuthManager.logout()
                             dismiss()
