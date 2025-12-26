@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   const CYANITE_ACCESS_TOKEN = process.env.CYANITE_ACCESS_TOKEN;
   // Note: Webhook secret is handled by Cyanite dashboard settings
-  const CYANITE_WEBHOOK_SECRET = process.env.CYANITE_WEBHOOK_SECRET || 'db52040cad6b1cfb8a5c22344426e05938616';
+  const CYANITE_WEBHOOK_SECRET = process.env.CYANITE_WEBHOOK_SECRET;
 
   // --- POST: Webhook Handler (From Cyanite) ---
   if (req.method === "POST") {

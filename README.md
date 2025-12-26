@@ -4,10 +4,6 @@
 
 Cue is an iOS application that automatically curates music recommendations based on your real-time heart rate during workouts. The app connects to heart rate monitors (Bluetooth LE devices or Apple Watch via HealthKit) and uses your current heart rate zone to intelligently queue songs from Spotify that match your workout intensity.
 
-![App Screenshot 1](IMG_6690.PNG)
-
-![App Screenshot 2](IMG_6691.PNG)
-
 ## Overview
 
 The core concept is simple: different workout intensities require different types of music. When you're in a steady-state zone (zones 2-3), you might want more moderate tempo tracks. During threshold training (zones 4-5), you need high-energy music that matches your elevated heart rate. Cue automatically detects which zone you're in and queues appropriate tracks without any manual intervention.
@@ -155,6 +151,10 @@ The Vercel proxy is a simple Node.js serverless function that handles the Cyanit
 4. Set up Vercel deployment for the `api/cyanite-webhook.js` endpoint
 5. Configure Cyanite API credentials in Vercel environment variables
 6. Build and run on a physical iOS device (Bluetooth requires real hardware)
+
+![App Screenshot 1](IMG_6690.PNG)
+
+![App Screenshot 2](IMG_6691.PNG)
 
 ## License
 
